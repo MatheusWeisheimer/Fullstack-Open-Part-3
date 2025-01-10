@@ -1,5 +1,5 @@
 const express = require('express')
-const persons = require('./persons.json')
+let persons = require('./persons.json')
 
 const app = express()
 
@@ -23,6 +23,11 @@ app.get('/api/persons/:id', (request, response) => {
     } else {
         response.status(404).end()
     }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+    persons = persons.filter(p => p.id !== request.params.id)
+    response.status(204).end()
 })
 
 const PORT = 3001
