@@ -17,12 +17,26 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.post('/api/persons', (request, response) => {
+    const newName = request.body.name
+    const newNumber = request.body.number
     const newId = String(Math.floor(Math.random() * 1000000000))
+
+    if (!newName || !newNumber) {
+        return response.status(400).json({
+            "error": "content missing"
+        })
+    } else if (persons.find(p => p.name === newName)) {
+        return response.status(400).json({
+            "error": "name must be unique"
+        })
+    }
+
     const newPerson = {
         "id": newId,
         "name": request.body.name,
         "number": request.body.number
     }
+    
     persons = [...persons, newPerson]
     response.json(newPerson)
 }) 
