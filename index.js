@@ -1,8 +1,11 @@
 const express = require('express')
+const morgan = require('morgan')
+
 let persons = require('./persons.json')
 
 const app = express()
 app.use(express.json())
+app.use(morgan('tiny'))
 
 app.get('/info', (request, response) => {
     const date = new Date()
