@@ -4,8 +4,19 @@ const morgan = require('morgan')
 let persons = require('./persons.json')
 
 const app = express()
+
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(morgan((tokens, req, res) => {
+    morgan.token('data', (request, response) => JSON.stringify(request.body))
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), '-',
+      tokens['response-time'](req, res), 'ms',
+      tokens['data'](req, res)
+    ].join(' ')
+}))
 
 app.get('/info', (request, response) => {
     const date = new Date()
