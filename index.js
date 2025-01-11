@@ -6,6 +6,7 @@ let persons = require('./persons.json')
 
 const app = express()
 
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(cors())
 app.use(morgan((tokens, req, res) => {
