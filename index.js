@@ -1,8 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
-
-let persons = require('./persons.json')
+const Person = require('./models/person')
 
 const app = express()
 
@@ -30,50 +30,43 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.post('/api/persons', (request, response) => {
     const newName = request.body.name
     const newNumber = request.body.number
-    const newId = String(Math.floor(Math.random() * 1000000000))
 
     if (!newName || !newNumber) {
         return response.status(400).json({
             "error": "content missing"
         })
-    } else if (persons.find(p => p.name === newName)) {
-        return response.status(400).json({
-            "error": "name must be unique"
-        })
     }
 
-    const newPerson = {
-        "id": newId,
-        "name": request.body.name,
-        "number": request.body.number
-    }
-    
-    persons = [...persons, newPerson]
-    response.json(newPerson)
+    const newPerson = new Person({
+        name: newName,
+        number: newNumber
+    })
+
+    newPerson.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 }) 
 
 app.get('/api/persons/:id', (request, response) => {
-    const person = persons.find(p => p.id === request.params.id)
-
-    if (person) {   
+    Person.findById(request.params.id).then(person => {
         response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+/* app.delete('/api/persons/:id', (request, response) => {
     persons = persons.filter(p => p.id !== request.params.id)
     response.status(204).end()
 })
-
-const PORT = process.env.PORT || 3001
+ */
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
