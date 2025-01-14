@@ -43,18 +43,11 @@ app.get('/api/persons', (request, response, next) => {
 })
 
 app.post('/api/persons', (request, response, next) => {
-    const newName = request.body.name
-    const newNumber = request.body.number
-
-    if (!newName || !newNumber) {
-        return response.status(400).json({
-            "error": "content missing"
-        })
-    }
+    const {name, number} = request.body
 
     const newPerson = new Person({
-        name: newName,
-        number: newNumber
+        name: name,
+        number: number
     })
 
     newPerson.save()
@@ -81,9 +74,13 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: request.body.number 
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, {new: true})
+    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
         .then(updated => {
-            response.json(updated)
+            if (updated) {
+                response.json(updated)
+            } else {
+                response.status(404).send({error: "Information on target does not exist on server"})
+            }
         })
         .catch(error => next(error))
 })
